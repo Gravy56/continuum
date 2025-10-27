@@ -1,133 +1,52 @@
-/* Global */
 body {
-  font-family: 'EB Garamond', serif;
-  background: #f4f1ea;
-  color: #2c2c2c;
-  margin: 0;
-  padding: 0;
+  background-color: #fdfaf3;
+  font-family: 'Courier New', monospace;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
 }
 
-/* Header */
-header {
-  text-align: center;
-  background: #f9f6ef;
-  padding: 40px 20px 20px;
-  border-bottom: 2px solid #d9d3c3;
+.notebook {
+  background-color: #fffef8;
+  border: 2px solid #c9b79c;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 30px;
+  width: 700px;
 }
 
 h1 {
-  font-family: 'Crimson Pro', serif;
-  font-size: 3rem;
-  margin-bottom: 5px;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  color: #6b5f53;
-  font-size: 1.1rem;
-}
-
-/* Main Book Area */
-main {
-  flex: 1;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-/* Book Section */
-#book-section {
-  background: #fffdf7;
-  border: 1px solid #e0dbc9;
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
-  padding: 30px;
-  border-radius: 10px;
-  position: relative;
+  text-align: center;
+  font-family: 'Georgia', serif;
+  color: #654321;
 }
 
 #entries {
+  border-top: 2px dashed #c9b79c;
+  border-bottom: 2px dashed #c9b79c;
+  padding: 15px;
+  margin-bottom: 20px;
   max-height: 400px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-.book-content p {
-  margin: 0 0 15px;
-  line-height: 1.7;
-}
-
-.book-content b {
-  color: #8b6b3d;
-}
-
-/* Interaction Area */
-.input-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-input, textarea {
-  font-family: 'EB Garamond', serif;
-  font-size: 1rem;
-  border: 1px solid #d9d3c3;
-  padding: 10px;
-  border-radius: 5px;
-  background: #fffdf8;
-  resize: none;
+  overflow-y: scroll;
 }
 
 textarea {
-  height: 100px;
-}
-
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  width: 100%;
+  border: 1px solid #c9b79c;
+  border-radius: 6px;
+  font-size: 16px;
+  padding: 8px;
+  background-color: #fff;
 }
 
 button {
-  background: #e3d9c3;
+  background-color: #654321;
+  color: white;
+  padding: 8px 16px;
   border: none;
-  padding: 10px 15px;
   border-radius: 6px;
+  margin-top: 10px;
+  float: right;
   cursor: pointer;
-  font-family: 'Crimson Pro', serif;
-  transition: background 0.2s ease;
-}
-
-button:hover {
-  background: #d6cbb4;
-}
-
-.turn-info {
-  margin-top: 15px;
-  font-style: italic;
-  color: #6b5f53;
-}
-
-/* Footer */
-footer {
-  text-align: center;
-  padding: 15px 0;
-  font-size: 0.9rem;
-  background: #f9f6ef;
-  border-top: 2px solid #d9d3c3;
-  color: #6b5f53;
-}
-
-/* Scrollbar aesthetic */
-#entries::-webkit-scrollbar {
-  width: 8px;
-}
-#entries::-webkit-scrollbar-thumb {
-  background: #d6cbb4;
-  border-radius: 4px;
 }
