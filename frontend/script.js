@@ -1,56 +1,53 @@
-let username = "";
-const API = "";
+const backendURL = "https://your-render-url.onrender.com"; // replace with your actual Render backend URL
+const socket = io(backendURL);
+let username = prompt("Enter your nickname:");
+let entryBox = document.getElementById("entryBox");
+let submitBtn = document.getElementById("submitBtn");
+let entriesDiv = document.getElementById("entries");
+let turnDiv = document.getElementById("turn-status");
 
-async function getEntries() {
-  const res = await fetch(API + "/entries");
-  const data = await res.json();
-  const entriesDiv = document.getElementById("entries");
-  entriesDiv.innerHTML = data.map(e => 
-    `<p><b>${e.user}:</b> ${e.text}</p>`
-  ).join("");
-}
-
-async function getTurnInfo() {
-  const res = await fetch(API + "/current_turn");
-  const data = await res.json();
-  const turnDiv = document.getElementById("turnInfo");
-  turnDiv.textContent = data.active_user
-    ? `✍️ Current turn: ${data.active_user} (${Math.ceil(data.time_left)}s left)`
-    : "🕒 Waiting for next writer...";
-}
-
-document.getElementById("joinQueue").onclick = async () => {
-  username = document.getElementById("username").value.trim();
-  if (!username) return alert("Enter your name first!");
-  const res = await fetch(API + "/join", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({user: username})
+// Load entries
+fetch(`${backendURL}/entries`)
+  .then(res => res.json())
+  .then(entries => {
+    entries.forEach(appendEntry);
   });
-  const data = await res.json();
-  alert(data.message || data.error);
-};
 
-document.getElementById("submit").onclick = async () => {
-  const text = document.getElementById("entry").value.trim();
+socket.on("new_entry", (entry) => {
+  appendEntry(entry);
+});
+
+socket.on("turn_update", (data) => {
+  updateTurnDisplay(data);
+});
+
+submitBtn.onclick = async () => {
+  const text = entryBox.value.trim();
   if (!text) return alert("Write something first!");
-  const res = await fetch(API + "/add", {
+
+  const res = await fetch(`${backendURL}/add`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({user: username, text})
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, content: text }),
   });
   const data = await res.json();
   if (data.error) alert(data.error);
-  else {
-    document.getElementById("entry").value = "";
-    getEntries();
-  }
+  else entryBox.value = "";
 };
 
-setInterval(() => {
-  getEntries();
-  getTurnInfo();
-}, 3000);
+function appendEntry(entry) {
+  const div = document.createElement("div");
+  div.className = "entry";
+  const date = new Date(entry.timestamp * 1000).toLocaleString();
+  div.innerHTML = `<strong>${entry.author}</strong> (${date})<br>${entry.content}<hr>`;
+  entriesDiv.appendChild(div);
+  entriesDiv.scrollTop = entriesDiv.scrollHeight;
+}
 
-getEntries();
-getTurnInfo();
+function updateTurnDisplay(data) {
+  turnDiv.innerHTML = `
+    <p><b>Current turn:</b> ${data.current_turn || "None"}</p>
+    <p><b>Queue:</b> ${data.queue.join(", ") || "Empty"}</p>
+    <p><b>Time remaining:</b> ${data.remaining_time}s</p>
+  `;
+}
