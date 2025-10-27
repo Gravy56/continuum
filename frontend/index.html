@@ -1,42 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Continuum</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-  <header>
+  <div class="notebook">
     <h1>The Continuum</h1>
-    <p class="subtitle">A living story written by everyone.</p>
-  </header>
+    <div id="entries"></div>
 
-  <main>
-    <section id="book-section">
-      <div id="entries" class="book-content"></div>
-    </section>
+    <div id="turn-status"></div>
+    <textarea id="entryBox" placeholder="Write your piece..." rows="5"></textarea>
+    <button id="submitBtn">Submit</button>
+  </div>
 
-    <section id="interaction-section">
-      <div class="input-container">
-        <input id="username" placeholder="Your name..." autocomplete="off" />
-        <textarea id="entry" placeholder="Continue the story..."></textarea>
-      </div>
-
-      <div class="controls">
-        <button id="joinQueue">Join Queue</button>
-        <button id="submit">Submit</button>
-      </div>
-
-      <div id="turnInfo" class="turn-info"></div>
-    </section>
-  </main>
-
-  <footer>
-    <p>Made by <strong>The Community</strong> | Concept by Leo Vomacka</p>
-  </footer>
-
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="script.js"></script>
 </body>
 </html>
