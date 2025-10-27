@@ -1,81 +1,42 @@
-<!-- templates/index.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Continuum</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="page-wrap">
-    <div class="notebook">
-      <header class="nb-header">
-        <h1>r/page</h1>
-        <p class="subtitle">A single story. 2 minutes per person. Write the story of Reddit.</p>
-      </header>
+  <header>
+    <h1>The Continuum</h1>
+    <p class="subtitle">A living story written by everyone.</p>
+  </header>
 
-      <main class="nb-main">
-        <aside class="nb-left">
-          <section class="card register" id="register">
-            <h3>Join the book</h3>
-            <input id="nick" placeholder="Pick a nickname..." />
-            <button id="btn-register">Register</button>
-            <p id="reg-msg" class="muted"></p>
-          </section>
+  <main>
+    <section id="book-section">
+      <div id="entries" class="book-content"></div>
+    </section>
 
-          <section class="card controls hidden" id="controls">
-            <div class="row small">
-              <button id="btn-join">Join Queue</button>
-              <button id="btn-leave">Leave Queue</button>
-            </div>
-            <div class="row small">
-              <div id="current-info">No active writer</div>
-              <div id="timer">02:00</div>
-            </div>
+    <section id="interaction-section">
+      <div class="input-container">
+        <input id="username" placeholder="Your name..." autocomplete="off" />
+        <textarea id="entry" placeholder="Continue the story..."></textarea>
+      </div>
 
-            <div class="context-area">
-              <h4>Last entry</h4>
-              <div id="last-entry" class="last-entry muted">No entries yet — be first to write.</div>
-            </div>
-          </section>
+      <div class="controls">
+        <button id="joinQueue">Join Queue</button>
+        <button id="submit">Submit</button>
+      </div>
 
-          <section class="card queue">
-            <h4>Queue</h4>
-            <ul id="queue-list" class="queue-list"></ul>
-            <div id="cooldown-note" class="muted" style="margin-top:10px;"></div>
-          </section>
-        </aside>
+      <div id="turnInfo" class="turn-info"></div>
+    </section>
+  </main>
 
-        <section class="nb-page">
-          <div class="page-paper">
-            <div class="page-lines">
-              <div id="live-area" class="live-area">
-                <div id="live-top" class="live-top muted">Live draft (visible while current writer types)</div>
-                <div id="live-draft" class="live-draft">—</div>
+  <footer>
+    <p>Made by <strong>The Community</strong> | Concept by Leo Vomacka</p>
+  </footer>
 
-                <textarea id="writer-box" placeholder="Wait for your turn..." disabled></textarea>
-
-                <div class="row small">
-                  <div id="writer-status" class="muted">Not your turn</div>
-                  <button id="btn-submit" disabled>Submit (lock in)</button>
-                </div>
-              </div>
-
-
-              <div class="feed-header" style="margin-top:18px;">Full book</div>
-              <div id="full-book" class="feed"></div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer class="nb-foot">
-        <small>Prototype. Entries are permanent. Be kind and creative.</small>
-      </footer>
-    </div>
-  </div>
-
-  <script src="/static/script.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
