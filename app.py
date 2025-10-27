@@ -1,10 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import time
 import sqlite3
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # You can remove CORS now if frontend is served by Flask
+
+# ... keep all previous backend code here ...
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+# static files are automatically served from /static/
 
 DB = "entries.db"
 COOLDOWN = 5 * 60  # 5 minutes
