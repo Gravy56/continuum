@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime, timezone, timedelta
 import os
 
-DATABASE = 'project-continuum/continuum.db'
+DATABASE = 'continuum.db'
 TURN_SECONDS = 120  # 2 minutes per turn
 COOLDOWN_SECONDS = 300  # 5 minutes cooldown
 
