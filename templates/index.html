@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Continuum</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div id="notebook">
@@ -20,6 +20,6 @@
         <div id="full-book"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
