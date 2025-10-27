@@ -2,7 +2,7 @@
 import sqlite3
 from datetime import datetime
 
-DB = 'project-continuum/continuum.db'
+DB = 'continuum.db'
 
 schema = """
 PRAGMA foreign_keys = ON;
