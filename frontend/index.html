@@ -1,21 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Continuum</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="notebook">
-    <h1>The Continuum</h1>
-    <div id="entries"></div>
+  <div id="container">
+    <header>
+      <h1>📖 The Continuum</h1>
+      <p class="subtitle">A living story written by everyone, 2 minutes at a time.</p>
+    </header>
 
-    <div id="turn-status"></div>
-    <textarea id="entryBox" placeholder="Write your piece..." rows="5"></textarea>
-    <button id="submitBtn">Submit</button>
+    <section id="queue-section">
+      <h2>Join the Story</h2>
+      <input id="nickname" placeholder="Enter your nickname" maxlength="20" />
+      <button id="join-btn">Join Queue</button>
+      <p id="queue-status"></p>
+    </section>
+
+    <section id="writing-section" class="hidden">
+      <h2>Your Turn!</h2>
+      <div id="timer"></div>
+
+      <div class="notebook">
+        <div id="previous-entry" class="previous-entry"></div>
+        <textarea id="new-entry" placeholder="Continue the story..."></textarea>
+      </div>
+
+      <button id="submit-btn">Submit Entry</button>
+    </section>
+
+    <section id="book-section">
+      <h2>The Book So Far</h2>
+      <div id="book-content"></div>
+    </section>
   </div>
+
+  <footer>
+    <p>Created by the community · <a href="#">Learn more</a></p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
