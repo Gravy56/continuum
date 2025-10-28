@@ -1,8 +1,9 @@
-const API_URL = "https://continuum-5ue5.onrender.com"; // replace with your actual Render backend URL
+const API_URL = "https://continuum-5ue5.onrender.com";
+const socket = io(API_URL);
+
 let nickname = "";
 let timeLeft = 0;
 let timerInterval = null;
-let currentTurnUser = null;
 
 const joinBtn = document.getElementById("join-btn");
 const nicknameInput = document.getElementById("nickname");
@@ -16,7 +17,7 @@ const bookContent = document.getElementById("book-content");
 
 async function joinQueue() {
   nickname = nicknameInput.value.trim();
-  if (!nickname) return alert("Enter a nickname first!");
+  if (!nickname) return alert("Enter a nickname!");
 
   const res = await fetch(`${API_URL}/join`, {
     method: "POST",
@@ -24,52 +25,39 @@ async function joinQueue() {
     body: JSON.stringify({ name: nickname })
   });
   const data = await res.json();
-
-  queueStatus.textContent = data.message || "Joined the queue!";
+  queueStatus.textContent = data.message;
 }
 
-async function checkTurn() {
-  const res = await fetch(`${API_URL}/current_turn`);
+async function fetchBook() {
+  const res = await fetch(`${API_URL}/entries`);
   const data = await res.json();
-
-  if (!data.current) return;
-
-  currentTurnUser = data.current.user;
-  timeLeft = data.current.time_left;
-
-  if (currentTurnUser === nickname) {
-    startTurn();
-  } else {
-    endTurn();
-  }
-
-  updateTimerDisplay();
+  bookContent.innerHTML = data.map(e => `<p><b>${e.author}:</b> ${e.text}</p>`).join("");
 }
 
-function startTurn() {
+function startTurn(user, duration) {
+  if (user !== nickname) {
+    writingSection.classList.add("hidden");
+    timerDisplay.textContent = `${user}'s turn (${duration}s)`;
+    return;
+  }
   writingSection.classList.remove("hidden");
+  newEntry.value = "";
   fetchLastEntry();
+
+  timeLeft = duration;
+  timerDisplay.textContent = `Time left: ${timeLeft}s`;
+
   timerInterval = setInterval(() => {
     timeLeft -= 1;
-    updateTimerDisplay();
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      endTurn();
-    }
+    timerDisplay.textContent = `Time left: ${timeLeft}s`;
+    if (timeLeft <= 0) endTurn();
   }, 1000);
 }
 
 function endTurn() {
-  writingSection.classList.add("hidden");
   clearInterval(timerInterval);
-}
-
-function updateTimerDisplay() {
-  if (timeLeft > 0) {
-    timerDisplay.textContent = `Time left: ${timeLeft}s`;
-  } else {
-    timerDisplay.textContent = "";
-  }
+  writingSection.classList.add("hidden");
+  timerDisplay.textContent = "";
 }
 
 async function fetchLastEntry() {
@@ -79,31 +67,32 @@ async function fetchLastEntry() {
   previousEntry.textContent = lastEntry ? lastEntry.text : "The story begins...";
 }
 
-async function fetchBook() {
-  const res = await fetch(`${API_URL}/entries`);
-  const data = await res.json();
-  bookContent.innerHTML = data.map(e => `<p><b>${e.author}:</b> ${e.text}</p>`).join("");
-}
-
 submitBtn.addEventListener("click", async () => {
   const text = newEntry.value.trim();
-  if (!text) return alert("Write something first!");
+  if (!text) return;
 
-  const res = await fetch(`${API_URL}/add`, {
+  await fetch(`${API_URL}/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: nickname, text })
   });
-
-  if (res.ok) {
-    newEntry.value = "";
-    fetchBook();
-    endTurn();
-  }
+  newEntry.value = "";
+  endTurn();
 });
 
 joinBtn.addEventListener("click", joinQueue);
 
-setInterval(fetchBook, 10000);
-setInterval(checkTurn, 3000);
+// Live socket updates
+socket.on("new_entry", entry => {
+  const p = document.createElement("p");
+  p.innerHTML = `<b>${entry.author}:</b> ${entry.text}`;
+  bookContent.appendChild(p);
+});
+
+socket.on("turn_start", data => startTurn(data.user, data.time));
+socket.on("turn_end", data => {
+  if (data.user === nickname) endTurn();
+});
+
+// Load initial book
 fetchBook();
