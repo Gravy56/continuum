@@ -1,52 +1,115 @@
 body {
-  background-color: #fdfaf3;
-  font-family: 'Courier New', monospace;
+  font-family: 'Georgia', serif;
+  background: #f5f3e7;
+  color: #2d2d2d;
+  margin: 0;
+  padding: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
 }
 
-.notebook {
-  background-color: #fffef8;
-  border: 2px solid #c9b79c;
-  box-shadow: 4px 4px 10px rgba(0,0,0,0.1);
-  border-radius: 12px;
-  padding: 30px;
-  width: 700px;
+#container {
+  width: 90%;
+  max-width: 800px;
+  margin-top: 30px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 h1 {
-  text-align: center;
-  font-family: 'Georgia', serif;
-  color: #654321;
+  font-size: 2.5em;
+  margin-bottom: 5px;
+  color: #3b2f2f;
 }
 
-#entries {
-  border-top: 2px dashed #c9b79c;
-  border-bottom: 2px dashed #c9b79c;
-  padding: 15px;
-  margin-bottom: 20px;
-  max-height: 400px;
-  overflow-y: scroll;
+.subtitle {
+  color: #6a5f5f;
+  font-style: italic;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+input, textarea, button {
+  font-family: inherit;
+}
+
+#queue-section input {
+  padding: 8px;
+  font-size: 1em;
+  margin-right: 10px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+}
+
+#join-btn, #submit-btn {
+  background-color: #d3c4a3;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#join-btn:hover, #submit-btn:hover {
+  background-color: #c0ad8e;
+}
+
+.hidden {
+  display: none;
+}
+
+.notebook {
+  background: #fffef2;
+  border: 2px solid #d6cdb5;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.previous-entry {
+  color: #777;
+  font-style: italic;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 10px;
+  white-space: pre-wrap;
 }
 
 textarea {
   width: 100%;
-  border: 1px solid #c9b79c;
-  border-radius: 6px;
-  font-size: 16px;
-  padding: 8px;
-  background-color: #fff;
+  height: 120px;
+  border: none;
+  resize: none;
+  outline: none;
+  font-size: 1.1em;
+  background: transparent;
 }
 
-button {
-  background-color: #654321;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  margin-top: 10px;
-  float: right;
-  cursor: pointer;
+#book-content {
+  background: #fffef2;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+#timer {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #a14a28;
+  margin-bottom: 15px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9em;
+  color: #777;
 }
