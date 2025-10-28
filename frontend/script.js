@@ -1,4 +1,4 @@
-const backendURL = "https://your-render-url.onrender.com"; // replace with your actual Render backend URL
+const backendURL = "https://continuum-5ue5.onrender.com"; // replace with your actual Render backend URL
 const socket = io(backendURL);
 let username = prompt("Enter your nickname:");
 let entryBox = document.getElementById("entryBox");
