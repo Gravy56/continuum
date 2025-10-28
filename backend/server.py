@@ -1,10 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
-import time
-import threading
-import json
-import os
+import json, os, time
 
 app = Flask(__name__)
 CORS(app)
@@ -13,149 +10,109 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 BOOK_FILE = "book_data.json"
 TURN_FILE = "turn_data.json"
 
-class Book:
-    def __init__(self):
-        self.entries = []
+TURN_TIME = 120  # seconds
+COOLDOWN = 300  # 5 min
 
-    def add_entry(self, author, content):
-        self.entries.append({
-            "author": author,
-            "content": content,
-            "timestamp": time.time()
-        })
-        self.save()
+# --- Data Management ---
+def load_json(file, default):
+    if not os.path.exists(file):
+        with open(file, "w") as f:
+            json.dump(default, f)
+        return default
+    try:
+        with open(file, "r") as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        return default
 
-    def save(self):
-        with open(BOOK_FILE, "w") as f:
-            json.dump({"entries": self.entries}, f)
+def save_json(file, data):
+    with open(file, "w") as f:
+        json.dump(data, f, indent=2)
 
-    def load(self):
-        if os.path.exists(BOOK_FILE):
-            with open(BOOK_FILE, "r") as f:
-                self.entries = json.load(f).get("entries", [])
-        else:
-            self.entries = []
-
-class TurnManager:
-    def __init__(self, duration=120, cooldown=300):
-        self.queue = []
-        self.current_turn = None
-        self.turn_start_time = 0
-        self.duration = duration
-        self.cooldown = cooldown
-        self.last_turns = {}
-        self.lock = threading.Lock()
-        self.load()
-
-    def load(self):
-        if os.path.exists(TURN_FILE):
-            with open(TURN_FILE, "r") as f:
-                data = json.load(f)
-                self.queue = data.get("queue", [])
-                self.current_turn = data.get("current_turn")
-                self.turn_start_time = data.get("turn_start_time", 0)
-                self.last_turns = data.get("last_turns", {})
-        else:
-            self.save()
-
-    def save(self):
-        data = {
-            "queue": self.queue,
-            "current_turn": self.current_turn,
-            "turn_start_time": self.turn_start_time,
-            "last_turns": self.last_turns
-        }
-        with open(TURN_FILE, "w") as f:
-            json.dump(data, f)
-
-    def join_queue(self, username):
-        with self.lock:
-            now = time.time()
-            if username in self.last_turns and now - self.last_turns[username] < self.cooldown:
-                wait = int(self.cooldown - (now - self.last_turns[username]))
-                return {"error": f"Cooldown active. Wait {wait}s."}
-
-            if username in self.queue:
-                return {"error": "Already in queue."}
-
-            self.queue.append(username)
-            self.save()
-            return {"success": f"{username} joined the queue."}
-
-    def next_turn(self):
-        with self.lock:
-            now = time.time()
-            if self.current_turn and now - self.turn_start_time < self.duration:
-                return self.current_turn
-
-            if self.queue:
-                self.current_turn = self.queue.pop(0)
-                self.turn_start_time = now
-                self.save()
-                socketio.emit("turn_update", self.status())
-                return self.current_turn
-            else:
-                self.current_turn = None
-                self.save()
-                socketio.emit("turn_update", self.status())
-                return None
-
-    def status(self):
-        remaining = (
-            max(0, self.duration - (time.time() - self.turn_start_time))
-            if self.current_turn else 0
-        )
-        return {
-            "current_turn": self.current_turn,
-            "remaining_time": int(remaining),
-            "queue": self.queue,
-        }
-
-book = Book()
-book.load()
-turns = TurnManager()
-
-@app.route("/entries", methods=["GET"])
+# --- Routes ---
+@app.route("/entries")
 def get_entries():
-    return jsonify(book.entries)
-
-@app.route("/join", methods=["POST"])
-def join_queue():
-    username = request.json.get("username")
-    result = turns.join_queue(username)
-    socketio.emit("turn_update", turns.status())
-    return jsonify(result)
+    data = load_json(BOOK_FILE, {"entries": []})
+    return jsonify(data["entries"])
 
 @app.route("/add", methods=["POST"])
 def add_entry():
-    data = request.json
-    username = data.get("username")
-    content = data.get("content")
+    body = request.json
+    name = body.get("name")
+    text = body.get("text")
+    if not name or not text:
+        return jsonify({"error": "Missing data"}), 400
 
-    if turns.current_turn != username:
-        return jsonify({"error": "Not your turn."}), 403
+    entries = load_json(BOOK_FILE, {"entries": []})
+    entries["entries"].append({
+        "author": name,
+        "text": text,
+        "time": time.time()
+    })
+    save_json(BOOK_FILE, entries)
 
-    book.add_entry(username, content)
-    turns.last_turns[username] = time.time()
-    turns.save()
-    turns.next_turn()
+    # Broadcast new entry live
+    socketio.emit("new_entry", entries["entries"][-1])
+    return jsonify({"status": "ok"})
 
-    socketio.emit("new_entry", book.entries[-1])
-    return jsonify({"success": True})
+@app.route("/join", methods=["POST"])
+def join_queue():
+    name = request.json.get("name")
+    data = load_json(TURN_FILE, {
+        "queue": [], "current_turn": None, "turn_start_time": 0, "last_turns": {}
+    })
 
-@app.route("/current_turn", methods=["GET"])
+    now = time.time()
+    last = data["last_turns"].get(name, 0)
+    if now - last < COOLDOWN:
+        return jsonify({"message": f"Wait {int(COOLDOWN - (now - last))}s cooldown."})
+
+    if name not in data["queue"]:
+        data["queue"].append(name)
+        save_json(TURN_FILE, data)
+        socketio.emit("queue_update", data["queue"])
+        return jsonify({"message": f"{name} joined the queue!"})
+    return jsonify({"message": "Already in queue."})
+
+@app.route("/current_turn")
 def current_turn():
-    turns.next_turn()
-    return jsonify(turns.status())
+    data = load_json(TURN_FILE, {
+        "queue": [], "current_turn": None, "turn_start_time": 0, "last_turns": {}
+    })
+    now = time.time()
 
-def turn_watcher():
-    """Background thread to auto-advance turns."""
-    while True:
-        time.sleep(1)
-        turns.next_turn()
+    # Check for expired turn
+    if data["current_turn"]:
+        if now - data["turn_start_time"] > TURN_TIME:
+            end_turn(data)
+    else:
+        if data["queue"]:
+            start_turn(data)
 
-watcher_thread = threading.Thread(target=turn_watcher, daemon=True)
-watcher_thread.start()
+    remaining = 0
+    if data["current_turn"]:
+        remaining = max(0, TURN_TIME - int(now - data["turn_start_time"]))
+
+    save_json(TURN_FILE, data)
+    return jsonify({"current": data["current_turn"], "time_left": remaining})
+
+# --- Turn Logic ---
+def start_turn(data):
+    next_user = data["queue"].pop(0)
+    data["current_turn"] = next_user
+    data["turn_start_time"] = time.time()
+    save_json(TURN_FILE, data)
+    socketio.emit("turn_start", {"user": next_user, "time": TURN_TIME})
+
+def end_turn(data):
+    if not data["current_turn"]:
+        return
+    user = data["current_turn"]
+    data["last_turns"][user] = time.time()
+    data["current_turn"] = None
+    data["turn_start_time"] = 0
+    save_json(TURN_FILE, data)
+    socketio.emit("turn_end", {"user": user})
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=10000)
