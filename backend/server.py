@@ -5,6 +5,16 @@ import time
 import threading
 import json
 import os
+from flask import send_from_directory
+
+@app.route('/')
+@app.route('/<path:path>')
+def serve_frontend(path=None):
+    build_dir = os.path.join(os.path.dirname(__file__), 'build')
+    if path and os.path.exists(os.path.join(build_dir, path)):
+        return send_from_directory(build_dir, path)
+    else:
+        return send_from_directory(build_dir, 'index.html')
 
 app = Flask(__name__)
 CORS(app)
